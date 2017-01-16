@@ -377,7 +377,7 @@ typedef struct
 #define PT_LOPROC      (0x70000000u)
 #define PT_HIPROC      (0x7FFFFFFFu)
 #define PT_ARM_ARCHEXT (0x70000000u)
-#define PT_ARMEXIDX    (0x70000001u)
+#define PT_ARM_EXIDX    (0x70000001u)
 #define PT_ARM_UNDWIND (0x70000001u)
 
 //Platform architecture compatibility data
