@@ -2,7 +2,7 @@ ________________________________________________________________________________
 
 libctrelf
 
-Copyright 2016 Gabriel Marcano
+Copyright 2023 Gabriel Marcano
 ________________________________________________________________________________
 
 
@@ -30,41 +30,46 @@ stable. Breaking changes will be mentioned in commits at the very least.
 Dependencies
 --------------------------------------------------------------------------------
 
- - Autotools in general. These are used to create the build scripts.
+ - Meson and pkgconf/pkgconfig.
 
 --------------------------------------------------------------------------------
 Compiling
 --------------------------------------------------------------------------------
 
-The Autotools setup assumes that devkitarm is already in the PATH.
+Meson requires a cross-file defining the cross-compiler to use, as well as a few
+other tools and paths for pkgconf/pkgconfig. Additionally, the cross-file should
+specify the required compiler flags for the target. For examples for the 3DS,
+refer to the [libctr9](https://github.com/gemarcano/libctr9 and
+[libctr11](https://github.com/gemarcano/libctr11) projects.
 
- # this following line is if the 3ds compiler isn't in the path
- export PATH=${PATH}:${DEVKITPRO}/bin:${DEVKITARM}/bin
- autoreconf -if
- ./configure --host arm-none-eabi --prefix=[lib install path]
- make
+```
+# this following line is if the 3ds compiler isn't in the path
+mkdir build/
+cd build
+meson setup --cross-file [cross-file-path] --prefix [prefix-path]
+meson compile
+```
 
 Example:
-  export PATH=${PATH}:${DEVKITPRO}/bin:${DEVKITARM}/bin
-  autoreconf -if
-  ./configure --host arm-none-eabi --prefix="$HOME/.local/usr/arm-none-eabi-9/"
-  make -j10
+```
+mkdir build/
+cd build
+# assuming the cross-file is in ~/.local/share/meson/cross/
+meson setup --cross-file 3ds_baremetal_arm9 --prefix ~/.local/3ds_baremetal_arm9/
+meson compile
+```
 
 
 --------------------------------------------------------------------------------
 Installation
 --------------------------------------------------------------------------------
 
-TBD. This library is built using Autotools, so it supports the 'make install'
-and 'make uninstall' targets. Be sure to set --prefix when calling configure
-if either of the preceeding targets will be used, else by default the generated
-Makefile will install to /usr/local/ (most likely)) !
+The following will install the library into the prefix specified when setting
+up meson:
 
-Example (after having compiled):
-  #this will install to the directory specified in prefix, or /usr/local/ if
-  #prefix isn't defined (most likely)!
-  make install
-
+```
+meson install
+```
 
 --------------------------------------------------------------------------------
 Usage
@@ -75,9 +80,11 @@ projects to point the compiler to find the library, then use -lctrelf to cause
 the linker to link in the static library.
 
 Example:
-  arm-none-eabi-gcc -I$HOME/.local/usr/arm-none-eabi-9/include \
-    -L$HOME/.local/usr/arm-none-eabi-9/lib -Os -Wall -Wextra -Wpedantic hello.c\
-    -lctrelf
+```
+arm-none-eabi-gcc -I~/.local/3ds_baremetal_arm9/include \
+  -L~/.local/3ds_baremetal_arm9/lib -Os -Wall -Wextra -Wpedantic hello.c \
+  -lctrelf
+```
 
 One setup that is recommended is to export a variable such as, CTRARM9, to point
 to the root of the prefix where libctr9 is installed. This way, it is easier to
@@ -101,14 +108,6 @@ In addition, some documentation is hosted in GitHub pages:
 --------------------------------------------------------------------------------
 Testing (TODO)
 --------------------------------------------------------------------------------
-
-This project does include a homegrown unit testing framework and some unit tests
-for this library. See the test/ directory for more information. Note that the
-unit testing payload WILL write to NAND (in theory writes to areas that are
-unused) as a part of unit testing.
-
-To compile it, change directory to test/, then execute `make test`. The
-generated test.bin is an A9LH compatible binary.
 
 
 --------------------------------------------------------------------------------
@@ -152,6 +151,5 @@ Credits
     development of this library
  - Delebile for publishing the public arm9loaderhax implementation, making using
     and testing this library possible (or less of a pain)
- - Aurora, et. al (you know who you are, I hope) for for general development
+ - Aurora, et al. (you know who you are, I hope) for for general development
     help and brainstorming
-
